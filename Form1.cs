@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Data.Entity;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,16 +16,11 @@ namespace WinfromsLesson10
     {
         DBEntities1 db = new DBEntities1();
         Person person = new Person();
-        int flag = 0;
         public Form1()
         {
             InitializeComponent();
         }
 
-        private void label1_Click(object sender, EventArgs e)
-        {
-
-        }
 
 
         private void LoadData()
@@ -41,52 +37,52 @@ namespace WinfromsLesson10
         {
             try
             {
-                person.FirstName =txtFirstName.Text;
-                person.LastName = txtLastName.Text;
                 int.TryParse(txtAge.Text, out int result);
-                person.Age = result;
+                person = new Person()
+                {
+                    Age = result,
+                    FirstName = txtFirstName.Text,
+                    LastName = txtLastName.Text
+                };
                 db.Person.Add(person);
                 if (db.SaveChanges() > 0)
                 {
                     MessageBox.Show("success");
                 }
                 LoadData();
-
-
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.ToString());
-                
+
             }
-      
-        }
-
-        public void  ClearData()
-        {
 
         }
+
         private void button1_Click(object sender, EventArgs e)
         {
             try
             {
-                if(person!=null)
+                if (person != null)
                 {
                     db.Person.Remove(person);
                     db.SaveChanges();
-                    flag = 1;
-                    //LoadData();
+                    LoadData();
                     MessageBox.Show("delete success");
                 }
-          
-            } 
+                else
+                {
+                    MessageBox.Show("error! empty data!");
+                }
+
+            }
             catch (Exception ex)
             {
                 MessageBox.Show("error delete!");
 
-               
+
             }
-          
+
 
         }
 
@@ -100,13 +96,14 @@ namespace WinfromsLesson10
         {
             try
             {
-               if(flag != 1 )
-                {
-                    if (dataGridView1.CurrentCell.RowIndex != -1)
-                    {
 
-                        int empId = Convert.ToInt32(dataGridView1.Rows[dataGridView1.CurrentCell.RowIndex].Cells["Id"].Value);
-                        person = db.Person.Where(t => t.Id == empId).FirstOrDefault();
+                if (dataGridView1.CurrentCell.RowIndex != -1)
+                {
+
+                    int empId = Convert.ToInt32(dataGridView1.Rows[dataGridView1.CurrentCell.RowIndex].Cells["Id"].Value);
+                    person = db.Person.Where(t => t.Id == empId).FirstOrDefault();
+                    if (person != null)
+                    {
                         txtFirstName.Text = person.FirstName;
                         txtLastName.Text = person.LastName;
                         txtAge.Text = person.Age.ToString();
@@ -114,44 +111,45 @@ namespace WinfromsLesson10
                     }
 
                 }
-                else
-                {
-                   // LoadData();
-                    flag = 0;
-                }
-            
+
+
             }
             catch (Exception ex)
             {
 
                 MessageBox.Show("error 1!");
             }
-          
+
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
             try
             {
-                person.FirstName = txtFirstName.Text;
-                person.LastName = txtLastName.Text;
-                int.TryParse(txtAge.Text, out int result);
-                person.Age = result;
-                if (dataGridView1.Rows.Count > 0)
+                if (person != null)
                 {
+                    person.FirstName = txtFirstName.Text;
+                    person.LastName = txtLastName.Text;
+                    int.TryParse(txtAge.Text, out int result);
+                    person.Age = result;
                     db.Entry(person).State = EntityState.Modified;
                     db.SaveChanges();
                     MessageBox.Show("success to update");
                     LoadData();
+                }
+                else
+                {
+                    MessageBox.Show("error! empty data!");
 
                 }
+
             }
             catch (Exception ex)
             {
 
                 MessageBox.Show("eror to update!");
             }
-  
+
 
         }
     }
